@@ -36,10 +36,11 @@ jobs:
           fetch-depth: 0          # full history so the CFBundleVersion (commit count) is correct
           persist-credentials: true
 
-      - name: Select Xcode
-        # Pin to 26.4.1: the runner's default (26.5) ships an actool that crashes on the Icon Composer
-        # `.icon` (refractivity) asset. 26.4.1 is the closest available to the toolchain it's authored on.
-        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+      - name: Select Xcode 26.4.1
+        # Xcode 26.5's actool crashes compiling Icon Composer `.icon` files (Apple regression FB20183399);
+        # 26.4.1 is the last version that compiles them. Set DEVELOPER_DIR rather than `xcode-select`: the
+        # runner exports DEVELOPER_DIR, which xcrun/actool honor over the xcode-select symlink.
+        run: echo "DEVELOPER_DIR=/Applications/Xcode_26.4.1.app/Contents/Developer" >> "$GITHUB_ENV"
 
       - name: Resolve tag, version, and channel
         id: meta
