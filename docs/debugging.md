@@ -8,13 +8,15 @@ chasing a startup or refresh problem.
 The project script owns the build/run loop. From the repo root:
 
 ```sh
-./script/build_and_run.sh          # build, install "OpenUsage Preview", launch it
+./script/build_and_run.sh          # build and launch the dev app from dist/
 ./script/build_and_run.sh build    # build and stage only, don't launch
 ./script/build_and_run.sh verify   # launch and confirm the process is running
 ```
 
-The preview installs as **OpenUsage Preview** in `/Applications` with its own bundle id, so it runs
-side-by-side with a released OpenUsage without clobbering its settings.
+The script builds a signed app bundle under `dist/` and launches it in place — nothing is installed to
+`/Applications`. The dev build uses its own bundle id (`com.robinebers.openusage.dev`), so it keeps its
+own settings and keychain and never disturbs a released OpenUsage. It ships no update feed, so it never
+checks for updates — test updates with a real signed, notarized release build.
 
 ## Stream logs
 
@@ -24,7 +26,7 @@ To watch the app's logs live while you reproduce an issue:
 ./script/build_and_run.sh logs
 ```
 
-This launches the preview and then streams its unified logs. Under the hood it filters the system log to
+This launches the dev app and then streams its unified logs. Under the hood it filters the system log to
 the app's process, equivalent to:
 
 ```sh

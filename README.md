@@ -51,7 +51,7 @@ For working on the code, see the developer docs: [architecture](docs/architectur
 ```sh
 swift build            # debug build
 swift test             # run the test suite
-./script/build_and_run.sh   # build, install to /Applications, and launch
+./script/build_and_run.sh   # build and launch the dev app from dist/ (no install)
 ```
 
 ## Architecture

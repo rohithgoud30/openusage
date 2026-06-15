@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Builds the OpenUsage preview, stages a .app bundle, codesigns it with a stable
-# Apple Development identity (so keychain/permission ACLs stick across rebuilds),
-# installs it to /Applications as "OpenUsage Preview", and launches it.
+# Builds OpenUsage, stages a signed .app bundle under dist/, and launches it in place — no install
+# to /Applications. The dev build:
+#   - is signed with a stable Apple Development identity, so keychain/permission grants stick across
+#     rebuilds (macOS keys those to the signing identity + bundle id, not the install location);
+#   - uses its own bundle id (com.robinebers.openusage.dev), so it never touches the real installed
+#     app's settings or keychain. To run against the real app's data instead, set BUNDLE_ID to
+#     com.robinebers.openusage below;
+#   - ships no Sparkle feed, so it never checks for or installs updates (test updates with a real
+#     signed + notarized release build — that's the only honest way).
 #
 # Usage: script/build_and_run.sh [run|build|logs|verify]
 # Env:   CODESIGN_IDENTITY  override signing identity (exact name or hash)
@@ -13,18 +19,11 @@ MODE="${1:-run}"
 CONFIG="${CONFIG:-release}"
 
 TARGET_NAME="OpenUsage"                 # SwiftPM target / binary name
-APP_DISPLAY="OpenUsage Preview"         # user-facing app name
-BUNDLE_ID="com.robinebers.openusage.preview"
+APP_DISPLAY="OpenUsage"                 # user-facing app name
+BUNDLE_ID="com.robinebers.openusage.dev"
 MIN_SYSTEM_VERSION="26.0"
 APP_VERSION="0.7.0"
 APP_BUILD="0.7.0"
-
-# Sparkle feed keys, baked in so the Settings "Updates" section is visible in the preview build
-# (it only renders when SUFeedURL is present — see UpdaterController). These match the release build's
-# public key + feed URL, but automatic checks stay OFF below so a dev build never replaces itself with a
-# real release in the background. The manual "Check for Updates…" button works against the live appcast.
-SPARKLE_PUBLIC_KEY="mNodQoOL3cI2ym60dX20yL8NlwgoAKVeX3eMWAjvusE="
-FEED_URL="https://robinebers.github.io/openusage/appcast.xml"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
@@ -36,8 +35,6 @@ APP_BINARY="$APP_MACOS/$TARGET_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 RESOURCE_BUNDLE_NAME="${TARGET_NAME}_${TARGET_NAME}.bundle"
 ENTITLEMENTS="$ROOT_DIR/script/OpenUsage.dev.entitlements.plist"
-INSTALL_DIR="/Applications"
-INSTALLED_APP="$INSTALL_DIR/$APP_DISPLAY.app"
 
 pkill -x "$TARGET_NAME" >/dev/null 2>&1 || true
 
@@ -45,7 +42,6 @@ echo "==> swift build ($CONFIG)"
 swift build -c "$CONFIG"
 BUILD_DIR="$(swift build -c "$CONFIG" --show-bin-path)"
 BUILD_BINARY="$BUILD_DIR/$TARGET_NAME"
-RESOURCE_BUNDLE="$BUILD_DIR/$RESOURCE_BUNDLE_NAME"
 
 if [ ! -x "$BUILD_BINARY" ]; then
   echo "missing built binary: $BUILD_BINARY" >&2
@@ -110,12 +106,6 @@ cat >"$INFO_PLIST" <<PLIST
   <string>NSApplication</string>
   <key>NSHighResolutionCapable</key>
   <true/>
-  <key>SUFeedURL</key>
-  <string>$FEED_URL</string>
-  <key>SUPublicEDKey</key>
-  <string>$SPARKLE_PUBLIC_KEY</string>
-  <key>SUEnableAutomaticChecks</key>
-  <false/>
 </dict>
 </plist>
 PLIST
@@ -129,8 +119,8 @@ if [ -z "$CODESIGN_IDENTITY" ]; then
 fi
 
 # Embed + sign Sparkle.framework before sealing the app. The executable links Sparkle, so without the
-# embedded framework the preview build would fail to launch. The preview ships the same SUFeedURL as
-# release (so the Updates UI is visible) but with automatic checks disabled (see Info.plist above).
+# embedded framework the build would fail to launch — even though the updater stays dormant here (no
+# SUFeedURL in the Info.plist above; see UpdaterController).
 "$ROOT_DIR/script/embed_sparkle.sh" "$APP_BUNDLE" "$APP_BINARY" "$CODESIGN_IDENTITY" "--options runtime"
 
 if [ -n "$CODESIGN_IDENTITY" ]; then
@@ -145,32 +135,23 @@ else
   echo "WARNING: no Apple Development identity found; ad-hoc signed." >&2
 fi
 
-install_app() {
-  echo "==> installing to $INSTALLED_APP"
-  rm -rf "$INSTALLED_APP"
-  cp -R "$APP_BUNDLE" "$INSTALLED_APP"
-}
-
 launch_app() {
-  /usr/bin/open -n "$INSTALLED_APP"
+  /usr/bin/open -n "$APP_BUNDLE"
 }
 
 case "$MODE" in
   run)
-    install_app
     launch_app
-    echo "==> launched $APP_DISPLAY"
+    echo "==> launched $APP_DISPLAY (dist/$APP_DISPLAY.app)"
     ;;
   build)
     : # build + stage + sign only
     ;;
   logs)
-    install_app
     launch_app
     /usr/bin/log stream --info --style compact --predicate "process == \"$TARGET_NAME\""
     ;;
   verify)
-    install_app
     launch_app
     sleep 1
     pgrep -x "$TARGET_NAME" >/dev/null && echo "==> running"
