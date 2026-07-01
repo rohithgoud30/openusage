@@ -20,7 +20,7 @@ Star a metric from any row's right-click menu, or from the star that appears whe
 Settings → Appearance → Menu Style:
 
 - **Text** — provider icon plus values; two starred metrics from the same provider stack as a labeled pair.
-- **Bars** — compact vertical bars, one per starred metric that has a limit (metrics without limits only appear in Text style).
+- **Bars** — compact vertical bars, one per provider with a starred metric that has a limit. When a provider has multiple starred metrics, Bars uses the first limited metric in your Customize order; metrics without limits only appear in Text style.
 
 ## What the strip shows
 

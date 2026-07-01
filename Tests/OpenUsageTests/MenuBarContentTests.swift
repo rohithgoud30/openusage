@@ -2,8 +2,8 @@ import XCTest
 @testable import OpenUsage
 
 /// Covers `MenuBarContentBuilder`: it resolves pinned provider groups into Text groups (order, labels,
-/// and values preserved) and Bars entries (bounded metrics only, first four in order), and reports empty
-/// when nothing is pinned.
+/// and values preserved) and Bars entries (first bounded metric per provider, first four providers in
+/// order), and reports empty when nothing is pinned.
 @MainActor
 final class MenuBarContentTests: XCTestCase {
     func testEmptyWhenNoGroups() {
@@ -25,33 +25,42 @@ final class MenuBarContentTests: XCTestCase {
         XCTAssertEqual(content.groups[1].metrics.map(\.id), ["b.m1"])
     }
 
-    func testBarsIncludeBoundedMetricsAndDropUnbounded() {
-        // A bounded dollar metric has a fill, so it belongs in Bars. An unbounded value (raw spend,
-        // no limit) has no fill and is dropped.
+    func testBarsUseFirstBoundedMetricPerProviderAndDropUnboundedProviders() {
+        // A bounded dollar metric has a fill, so it can represent a provider in Bars. An unbounded
+        // value (raw spend, no limit) has no fill, so Bars skips to the provider's first bounded pin.
         let content = MenuBarContentBuilder.build(
-            groups: [group("a",
-                percent("a.pct", "Pct", 40),
-                boundedDollars("a.credits", "Credits", used: 12000, limit: 18000),
-                unbounded("a.spend", "Spend"))],
+            groups: [
+                group("a",
+                    percent("a.pct", "Pct", 40),
+                    boundedDollars("a.credits", "Credits", used: 12000, limit: 18000),
+                    unbounded("a.spend", "Spend")),
+                group("b",
+                    unbounded("b.spend", "Spend"),
+                    boundedDollars("b.credits", "Credits", used: 12000, limit: 18000)),
+                group("c",
+                    unbounded("c.spend", "Spend"))
+            ],
             data: { $0.sample }
         )
 
         XCTAssertEqual(content.groups[0].metrics.map(\.id), ["a.pct", "a.credits", "a.spend"])  // Text: all
-        XCTAssertEqual(content.bars.map(\.id), ["a.pct", "a.credits"])                          // Bars: bounded only
+        XCTAssertEqual(content.bars.map(\.id), ["a.pct", "b.credits"])                          // Bars: one bounded per provider
     }
 
-    func testBarsCappedToFourInOrder() {
+    func testBarsCappedToFourProvidersInOrder() {
         let content = MenuBarContentBuilder.build(
             groups: [
                 group("a", percent("a.m1", "M1", 10), percent("a.m2", "M2", 20)),
                 group("b", percent("b.m1", "M1", 30), percent("b.m2", "M2", 40)),
-                group("c", percent("c.m1", "M1", 50), percent("c.m2", "M2", 60))
+                group("c", percent("c.m1", "M1", 50), percent("c.m2", "M2", 60)),
+                group("d", percent("d.m1", "M1", 70), percent("d.m2", "M2", 80)),
+                group("e", percent("e.m1", "M1", 90), percent("e.m2", "M2", 95))
             ],
             data: { $0.sample }
         )
 
         XCTAssertEqual(content.bars.count, 4)
-        XCTAssertEqual(content.bars.map(\.id), ["a.m1", "a.m2", "b.m1", "b.m2"])
+        XCTAssertEqual(content.bars.map(\.id), ["a.m1", "b.m1", "c.m1", "d.m1"])
     }
 
     func testNoDataMetricsDropFromStrip() {
@@ -85,6 +94,20 @@ final class MenuBarContentTests: XCTestCase {
             data: { $0.sample }
         )
         XCTAssertEqual(content.accessibilityText, "A Session 41%, Weekly 12%")
+    }
+
+    func testBarsAccessibilityTextSummarizesRenderedBarsOnly() {
+        let content = MenuBarContentBuilder.build(
+            groups: [
+                group("a", percent("a.session", "Session", 41), percent("a.weekly", "Weekly", 12)),
+                group("b", unbounded("b.spend", "Spend"), boundedDollars("b.credits", "Credits", used: 12000, limit: 18000))
+            ],
+            data: { $0.sample }
+        )
+
+        XCTAssertEqual(content.accessibilityText, "A Session 41%, Weekly 12%; B Spend $42, Credits $12K")
+        XCTAssertEqual(content.bars.map(\.id), ["a.session", "b.credits"])
+        XCTAssertEqual(content.barsAccessibilityText, "A Session 41%; B Credits $12K")
     }
 
     func testTrayLabelsShortenLongTimeWindows() {

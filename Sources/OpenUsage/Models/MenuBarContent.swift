@@ -2,8 +2,8 @@ import Foundation
 
 /// Resolved, ordered, capped data for the menu-bar strip, built from the pinned metrics and their live
 /// values. The renderers consume this: `groups` drives the Text style (one segment per pinned provider,
-/// each with its 1–2 pinned metrics), `bars` drives the Bars style (the first four bounded metrics — any
-/// with a fill, not just percentages — in order). `isEmpty` means render the plain app icon.
+/// each with its 1–2 pinned metrics), `bars` drives the Bars style (the first bounded metric per
+/// provider, capped to four providers). `isEmpty` means render the plain app icon.
 struct MenuBarContent: Equatable {
     /// One resolved pinned metric.
     struct Metric: Equatable {
@@ -27,7 +27,7 @@ struct MenuBarContent: Equatable {
     /// have real data appear, and a provider whose pinned metrics all lack data drops out entirely
     /// (no orphan icon) — so the strip never renders "—" placeholders.
     let groups: [Group]
-    /// Bounded metrics (those with a fill) for the Bars style, flattened in order and capped to four.
+    /// Bounded metrics (those with a fill) for the Bars style, one per provider and capped to four.
     let bars: [Metric]
 
     /// Nothing is pinned, every pinned provider is disabled, or no pinned metric has data yet — the
@@ -43,12 +43,23 @@ struct MenuBarContent: Equatable {
         }
         .joined(separator: "; ")
     }
+
+    /// VoiceOver summary for Bars style. Bars renders at most one metric per provider, so its
+    /// accessibility text must not announce the extra starred metrics that Text style can show.
+    var barsAccessibilityText: String {
+        let barIDs = Set(bars.map(\.id))
+        return groups.compactMap { group in
+            guard let metric = group.metrics.first(where: { barIDs.contains($0.id) }) else { return nil }
+            return "\(group.displayName) \(metric.label) \(metric.value)"
+        }
+        .joined(separator: "; ")
+    }
 }
 
 @MainActor
 enum MenuBarContentBuilder {
-    /// Max bars the compact style renders (matches the original OpenUsage tray).
-    static let maxBars = 4
+    /// Max providers the compact style renders.
+    static let maxBarProviders = 4
 
     /// Resolve pinned provider groups into menu-bar content. `groups` is `LayoutStore.pinnedGroups`
     /// (already ordered, disabled providers excluded); `data` resolves each descriptor to its live
@@ -69,12 +80,12 @@ enum MenuBarContentBuilder {
                 metrics: metrics
             )
         }
-        // Bars show any *bounded* metric (it has a fill), not just percentages. Unbounded values (raw
-        // spend/credits, no limit) have no fill and are dropped.
+        // Bars show the first *bounded* metric (it has a fill) per provider. Text can stack two starred
+        // values for a provider; Bars stays provider-count based so enabling two providers yields two
+        // bars instead of four.
         let bars = resolvedGroups
-            .flatMap(\.metrics)
-            .filter(\.isBounded)
-            .prefix(maxBars)
+            .compactMap { $0.metrics.first(where: \.isBounded) }
+            .prefix(maxBarProviders)
         return MenuBarContent(groups: resolvedGroups, bars: Array(bars))
     }
 

@@ -25,6 +25,30 @@ final class MenuBarStripMemoTests: XCTestCase {
         XCTAssertNotIdentical(text, bars)
     }
 
+    func testBarsImageUsesBarsAccessibilityText() throws {
+        let session = MenuBarContent.Metric(
+            id: "claude.session", label: "Session", value: "42%",
+            fraction: 0.42, isBounded: true, hasData: true
+        )
+        let weekly = MenuBarContent.Metric(
+            id: "claude.weekly", label: "Weekly", value: "87%",
+            fraction: 0.87, isBounded: true, hasData: true
+        )
+        let content = MenuBarContent(
+            groups: [MenuBarContent.Group(
+                providerID: "claude",
+                displayName: "Claude",
+                icon: .providerMark("claude"),
+                metrics: [session, weekly]
+            )],
+            bars: [session]
+        )
+
+        let bars = try XCTUnwrap(MenuBarStripRenderer.image(for: content, style: .bars))
+        XCTAssertEqual(content.accessibilityText, "Claude Session 42%, Weekly 87%")
+        XCTAssertEqual(bars.accessibilityDescription, "Claude Session 42%")
+    }
+
     private func makeContent(value: String) -> MenuBarContent {
         let metric = MenuBarContent.Metric(
             id: "claude.session", label: "Session", value: value,
