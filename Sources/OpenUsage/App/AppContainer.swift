@@ -22,12 +22,26 @@ final class AppContainer {
     /// Anonymous, opt-out usage telemetry (daily rollups). Exposed so Settings can toggle it and the
     /// app-termination hook can flush any queued events.
     let telemetry: TelemetryRecorder
+    /// Source of truth for the popover's transparency: the persisted Increase Transparency toggle, the
+    /// ephemeral secret-code easter-egg state, and the system accessibility flags it yields to. Read by both
+    /// the SwiftUI surface and the AppKit panel (`StatusItemController`).
+    let transparency: PopoverTransparencyStore
+    /// One-time onboarding state (the first-run Customize hint card). Only ever marked pending by
+    /// `FirstRunSeeder` on a fresh install, so existing installs never see the card.
+    let onboarding: OnboardingStore
     /// Read-only usage API on 127.0.0.1:6736 for other local apps (silently off when the port is taken).
     private let localAPI: LocalUsageServer
     // A `let` of a `Sendable` `Task` is implicitly nonisolated, so the nonisolated `deinit` can cancel it.
     private let refreshTask: Task<Void, Never>
+    /// The fresh-install credential-detection pass (see `FirstRunSeeder`); `nil` on every later launch.
+    private let seedTask: Task<Void, Never>?
+    /// The new-provider credential-detection pass (see `NewProviderSeeder`); `nil` unless this launch is
+    /// the first with a provider the install has never seen.
+    private let newProviderTask: Task<Void, Never>?
 
-    init() {
+    /// `isFreshInstall` must be captured by the caller BEFORE `SettingsMigrator.migrate()` runs (the
+    /// migrator's schema stamp makes the defaults domain non-empty). See `AppDelegate`.
+    init(isFreshInstall: Bool = false) {
         // Capture the user's login-shell environment off-main so provider keys exported in a shell
         // profile (e.g. OPENROUTER_API_KEY) resolve in a Finder/Dock-launched build, not only when
         // run from a terminal. Warmed here so the first refresh finds the cache ready.
@@ -67,6 +81,23 @@ final class AppContainer {
         // Re-enabling a provider should fetch it promptly, so clear any leftover failure backoff before
         // the enablement wake refreshes. `weak` breaks the cycle (dataStore already captures enablement).
         enablement.onProviderEnabled = { [weak dataStore] id in dataStore?.clearFailureBackoff(for: id) }
+        // Fresh installs start minimal: seed the enabled-provider list (Claude/Codex/Cursor right away,
+        // then the detected set once the local credential probe finishes). No-op on every later launch.
+        let onboarding = OnboardingStore()
+        self.seedTask = FirstRunSeeder.seedIfNeeded(
+            isFreshInstall: isFreshInstall,
+            providers: providers,
+            enablement: enablement,
+            onboarding: onboarding
+        )
+        // Providers added by an update get the same credential detection on their first launch — enabled
+        // only when the user actually has the tool. Runs every launch; a no-op unless the registry has a
+        // provider this install has never seen (fresh installs were just baselined by FirstRunSeeder).
+        self.newProviderTask = NewProviderSeeder.reconcileIfNeeded(
+            providers: providers,
+            enablement: enablement
+        )
+        self.onboarding = onboarding
         self.registry = registry
         self.enablement = enablement
         self.apiKeyProviders = apiKeyProviders
@@ -103,6 +134,7 @@ final class AppContainer {
             telemetry?.record(providerID: providerID, outcome: outcome, category: category, manual: manual)
         }
         self.telemetry = telemetry
+        self.transparency = PopoverTransparencyStore()
         self.localAPI = LocalUsageServer(state: { [layout, enablement, dataStore] in
             LocalUsageAPI.State(
                 enabledOrderedIDs: layout.providerOrder.filter { enablement.isEnabled($0) },
@@ -118,7 +150,11 @@ final class AppContainer {
         AppNotifications.shared.registerAsDelegate()
     }
 
-    deinit { refreshTask.cancel() }
+    deinit {
+        refreshTask.cancel()
+        seedTask?.cancel()
+        newProviderTask?.cancel()
+    }
 
     /// Drives live updates: refresh on launch, then again every refresh interval. Each pass honors the
     /// cache, so it only hits the network once a snapshot has actually expired. `@Observable` propagates

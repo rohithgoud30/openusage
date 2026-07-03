@@ -2,6 +2,12 @@
 
 The popover that opens from the menu bar icon. Providers are sections; each section shows the metrics you've enabled.
 
+## First launch
+
+A fresh install doesn't turn on every provider OpenUsage knows about. It starts with Claude, Codex, and Cursor, then quickly checks which AI tools are actually set up on your Mac (by looking for their local logins — nothing is sent anywhere) and switches to exactly that set. If nothing is found, the Claude/Codex/Cursor starter set stays. A one-time card at the top of the dashboard explains this and points to **Customize**, where you can turn any provider on or off; the card stays until you close it with its ✕ button.
+
+This full detection only happens on a brand-new install. Updates never change the providers you already have on or off — but when an update ships a provider you've never seen, the same local check runs once for just that provider and turns it on only if you actually have the tool. See [Which Providers Are On](provider-enablement.md) for the full lifecycle.
+
 Each provider card leads with its **Always Visible** metrics. Any metrics you've moved below the **On Demand** line are tucked away behind the in-card caret — click it to reveal them below the caret, click again to collapse. Open cards stay open across popover closes and app restarts. A provider with nothing tucked away shows no caret.
 
 When you expand a card, the tucked-away metrics open below the caret as a single-column list, so each detail row keeps the full card width.
@@ -29,29 +35,29 @@ Rows with a reset date tick every 30 seconds, so countdowns and pace stay live b
 
 ## Right-click menus
 
-Every row: **Hide · Star for menu bar / Unstar · Refresh \<provider\> · Customize…**
-Provider headers: **Hide \<provider\> · Refresh \<provider\> · Customize…** (Hide turns the whole provider off; turn it back on in Customize.) plus **Share Screenshot** (see below).
+Every row: **Hide · Star for menu bar / Unstar · Refresh \<provider\> · Customize…** (Customize opens straight to that provider's metrics.)
+Provider headers: **Hide \<provider\> · Refresh \<provider\> · Customize…** (Hide turns the whole provider off; turn it back on in Customize. Customize opens straight to that provider's metrics.) plus **Share Screenshot** (see below).
 
 ## Share
 
 Copy a clean, branded PNG of one provider's usage to your clipboard, ready to paste into a chat, a tweet, or a doc. There are two ways to reach it:
 
 - Right-click a provider header and choose **Share Screenshot**.
-- Open the footer's **⌄** menu and choose **Share Screenshot** ▸ *\<provider\>*. The submenu lists every provider currently showing on the dashboard.
+- Open the footer's **Options** menu and choose **Share Screenshot** ▸ *\<provider\>*. The submenu lists every provider currently showing on the dashboard.
 
 The image is a flexible-height PNG using the app's look — the provider's mark and name up top, the metric rows you currently see for that provider, and a small OpenUsage mark centered at the bottom. It follows your Light/Dark appearance and shows everything on the card as-is (nothing is hidden or blurred).
 
 ## Footer
 
-The bar pinned to the bottom of the popover. On the left: the app version, and a live "Next update in …" countdown you can click (or press **⌘R**) to refresh right away. On the right: a **Settings** button paired with a **⌄** menu. The menu holds the app-level actions — **Customize**, **Share Screenshot** (submenu of providers), **Check for Updates…**, **About OpenUsage**, and **Quit OpenUsage**.
+The bar pinned to the bottom of the popover. On the left: the app version, and a live "Next update in …" countdown you can click (or press **⌘R**) to refresh right away. On the right: an **Options** menu button. It holds everything in one place — **Customize**, **Settings**, **Share Screenshot** (submenu of providers), **Check for Updates…**, **About OpenUsage**, and **Quit OpenUsage**.
 
 ## Customize
 
-Open Customize from the **⌄** menu next to the footer's Settings button (or press **Return**). It's a two-level screen: a list of providers, then a provider's detail.
+Open Customize from the footer's **Options** menu (or press **Return**). It's a two-level screen: a list of providers, then a provider's detail.
 
-The **provider list** shows every provider with a switch to turn it on or off, an Active/Inactive status, a count of its metrics, and a chevron into its detail. Turn a provider off and it stays in the list, greyed — its metrics hide from the dashboard and menu bar but keep their setup for when you turn it back on. Drag providers by their grip to reorder; tap a row to open its detail.
+The **provider list** shows every provider with a switch to turn it on or off, an Active/Inactive status, a count of its metrics, and a chevron into its detail. Turn a provider off and it stays in the list, greyed — its metrics hide from the dashboard and menu bar but keep their setup for when you turn it back on. Drag providers by their grip to reorder; tap a row to open its detail. On a fresh install only the providers detected on your Mac start on (see "First launch" above); this list is where you add the rest.
 
-A provider's **detail** has a header (the same on/off switch) and two metric sections: **Always Visible** (shown on the dashboard card) and **On Demand** (tucked behind the card's caret). Each metric row is a switch with its name beside it, a star to pin it to the menu bar, and a drag grip. Drag a metric across the dashed divider between the sections to move it between Always Visible and On Demand, or drag it onto a row on the other side. You can star up to two metrics per provider for the menu bar. Providers that need an API key (OpenRouter today) show an **API Key** section here too — add, edit, or clear the key for just that provider.
+A provider's **detail** has a header (the same on/off switch) and two metric sections: **Always Visible** (shown on the dashboard card) and **On Demand** (tucked behind the card's caret). Each metric row is a switch with its name beside it, a star to add it to the menu bar, and a drag grip. Drag a metric across the dashed divider between the sections to move it between Always Visible and On Demand, or drag it onto a row on the other side. You can star up to two metrics per provider for the menu bar. Providers that need an API key (OpenRouter today) show an **API Key** section here too — add, edit, or clear the key for just that provider.
 
 Drag-reorder also works directly on the dashboard — drag a row within its provider, drag it across the caret boundary while the card is open, or drag a provider header to reorder sections. On a Force Touch trackpad you'll feel a light tap each time the dragged item snaps into a new slot.
 
@@ -59,7 +65,7 @@ The default reset layout keeps each provider's core quota meters and Usage Trend
 
 Made a change you didn't mean to? Press **⌘Z** to undo — it works anywhere in the popover (the dashboard and Customize alike) and steps back through your recent customization changes one at a time: hiding or showing a metric, reordering metrics or whole providers, starring or unstarring, and moving a metric across the divider all undo. Each step restores the exact previous arrangement. Undo is per-session (it starts fresh after a relaunch), and resetting clears it.
 
-When OpenUsage ships a new default metric, existing layouts get it once. If you turn it off, it stays off. The **Reset** button in Customize restores the default metrics, order, menu-bar stars, and which metrics start on demand, but leaves other preferences unchanged.
+When OpenUsage ships a new default metric, existing layouts get it once. If you turn it off, it stays off. A provider's **Reset** button (top right of its detail) restores that provider's default metrics, order, menu-bar stars, and which metrics start on demand, but leaves other providers and the provider order untouched. The **Reset All Customization** button (top right of the provider list) does the same for every provider at once and also restores the default provider order — it asks for confirmation first, since it wipes the whole layout and can't be undone.
 
 ## Keyboard
 

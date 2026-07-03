@@ -8,7 +8,6 @@ struct WidgetData: Hashable {
     /// Hover note for locally-estimated spend tiles (Codex/Claude/Grok Today / Yesterday / Last 30
     /// Days), whose dollars are imputed from token counts rather than billed.
     static let localEstimateNote = "Estimated locally, so it may be off"
-    static let ccusageEstimateNote = localEstimateNote
     /// Hover note for Cursor spend tiles, whose spend comes from Cursor's usage-history export.
     static let cursorUsageHistoryNote = "From your Cursor usage history."
     /// Headline shown on a placed tile with no real backing metric (em dash, U+2014).
@@ -559,9 +558,11 @@ extension WidgetData {
 
     private static let sessionWindowWidgetIDs: Set<String> = [
         "codex.session", "claude.session",
-        // Antigravity's three quota pools are rolling 5-hour windows too: an unused pool reports
+        // Antigravity's two pool meters are rolling 5-hour windows too: an unused pool reports
         // `used == 0` with a reset a full period out, so it gets the same "Not started" treatment.
-        "antigravity.geminiPro", "antigravity.geminiFlash", "antigravity.claude"
+        // The weekly meters deliberately aren't listed — like Claude/Codex, only session windows
+        // read "Not started".
+        "antigravity.geminiPro", "antigravity.claude"
     ]
 
     /// True when the bounded primary row's trailing text is a concrete reset countdown (so the row makes
