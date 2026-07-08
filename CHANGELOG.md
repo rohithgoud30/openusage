@@ -1,5 +1,64 @@
 # Changelog
 
+## v0.7.4-beta.4
+
+### New Features
+- Add GPT-5.6 pricing aliases and tests ([#880](https://github.com/robinebers/openusage/pull/880)) by @robinebers
+- Add a hover affordance to Usage Trend values ([#881](https://github.com/robinebers/openusage/pull/881)) by @robinebers
+
+### Bug Fixes
+- Clear the update banner after the available update is resolved ([#882](https://github.com/robinebers/openusage/pull/882)) by @robinebers
+- Fix request-wide long-context pricing and price GPT-5.6 fast variants correctly ([#885](https://github.com/robinebers/openusage/pull/885), [#889](https://github.com/robinebers/openusage/pull/889)) by @robinebers
+- Mark Cursor spend as estimated ([#886](https://github.com/robinebers/openusage/pull/886)) by @robinebers
+- Keep launch-at-login errors visible ([#887](https://github.com/robinebers/openusage/pull/887)) by @robinebers
+- Bound concurrent log parsing and report unreadable usage files without repeated warnings ([#888](https://github.com/robinebers/openusage/pull/888), [#890](https://github.com/robinebers/openusage/pull/890)) by @robinebers
+- Prefer profile-scoped Claude login over an inference-only environment token for live usage ([#865](https://github.com/robinebers/openusage/pull/865)) by @joshuavial
+- Preserve the initial popover height and measure it against the correct display ([#904](https://github.com/robinebers/openusage/pull/904)) by @robinebers
+- Show Codex usage percentages as reported while keeping near-empty pacing calm ([#905](https://github.com/robinebers/openusage/pull/905)) by @robinebers
+
+### Refactor
+- Remove unused UI plumbing ([#883](https://github.com/robinebers/openusage/pull/883)) by @robinebers
+- Simplify refresh coalescing, popover visibility, and model-share computation ([#891](https://github.com/robinebers/openusage/pull/891), [#893](https://github.com/robinebers/openusage/pull/893), [#894](https://github.com/robinebers/openusage/pull/894)) by @robinebers
+- Extract layout persistence, startup rules, dashboard sections, and panel management into focused components ([#895](https://github.com/robinebers/openusage/pull/895), [#896](https://github.com/robinebers/openusage/pull/896), [#897](https://github.com/robinebers/openusage/pull/897), [#898](https://github.com/robinebers/openusage/pull/898), [#899](https://github.com/robinebers/openusage/pull/899), [#900](https://github.com/robinebers/openusage/pull/900), [#902](https://github.com/robinebers/openusage/pull/902)) by @robinebers
+
+### Chores
+- Refresh pricing and panel documentation ([#884](https://github.com/robinebers/openusage/pull/884)) by @robinebers
+- Test the real metric-divider path ([#892](https://github.com/robinebers/openusage/pull/892)) by @robinebers
+
+---
+
+### Changelog
+**Full Changelog**: [v0.7.4-beta.3...v0.7.4-beta.4](https://github.com/robinebers/openusage/compare/v0.7.4-beta.3...v0.7.4-beta.4)
+
+- [a1bdc28](https://github.com/robinebers/openusage/commit/a1bdc288939a9fa8477efed3a2e7bdfbf570d899) Keep near-empty Codex pacing calm by @robinebers
+- [5fbc22b](https://github.com/robinebers/openusage/commit/5fbc22b3669b34ebd621765d86b7b8e8ddd211e8) Show Codex usage percentages as reported by @robinebers
+- [2da68aa](https://github.com/robinebers/openusage/commit/2da68aa4a5f91cb9b77deee2b2e94ca4dd7daf38) Capture display before measuring panel height by @robinebers
+- [4c53fb1](https://github.com/robinebers/openusage/commit/4c53fb1b8fa189900ad28a2cd25d73c21306ed21) Preserve the first panel height on open by @robinebers
+- [ac6a3e3](https://github.com/robinebers/openusage/commit/ac6a3e3e12fe2fb1c7e0eceb098f1683ec1bac3c) Extract panel outside-click handling by @robinebers
+- [07a35bd](https://github.com/robinebers/openusage/commit/07a35bd7b82ebdd63a3257828f1f8622d1dbde79) Extract panel height handling by @robinebers
+- [612d847](https://github.com/robinebers/openusage/commit/612d847893dc3f367ccf7d55bf09b10a5529bcf4) Extract popover footer by @robinebers
+- [dba66ad](https://github.com/robinebers/openusage/commit/dba66adac6b07673e0b84f63d108af808cea5399) Extract popover top bar by @robinebers
+- [0581cfc](https://github.com/robinebers/openusage/commit/0581cfc5f37c979d2d0d1fbfd3c601a37821cf6c) Extract dashboard scrolling content by @robinebers
+- [35842a9](https://github.com/robinebers/openusage/commit/35842a99b18c1364f31cf47780cb752556e1662a) Extract layout startup rules by @robinebers
+- [315e6b3](https://github.com/robinebers/openusage/commit/315e6b34749f64650186dee7bfe7a4ca921df3ee) Extract layout persistence by @robinebers
+- [a8750e7](https://github.com/robinebers/openusage/commit/a8750e70b785cf00ee118cb813b2b168f5c62d34) Keep unreadable log warnings quiet across batches by @robinebers
+- [76247d7](https://github.com/robinebers/openusage/commit/76247d7c7de32b38e1ee28d02144aef3453b8bee) Test the real metric divider path by @robinebers
+- [8ddc401](https://github.com/robinebers/openusage/commit/8ddc401ee97c6b740c5a65e17dec33630533cba6) Compute model shares once per render by @robinebers
+- [f44d4ef](https://github.com/robinebers/openusage/commit/f44d4ef783e2a7e380b131bc8a7a84fa2c51fbab) Use the controller popover visibility signal by @robinebers
+- [1040f53](https://github.com/robinebers/openusage/commit/1040f5356a29e1a0beb372ac36d205f28c0685b2) fix(claude): prefer profile-scoped login over inference-only env token for live usage by @joshuavial
+- [2d4a5b4](https://github.com/robinebers/openusage/commit/2d4a5b42ac8bb7c786901faee8002d22934d4ec4) Simplify menu bar refresh coalescing by @robinebers
+- [c0b190f](https://github.com/robinebers/openusage/commit/c0b190f13d3fa38eca8c1bc7a880ed4a35f47c9c) Log unreadable usage files once by @robinebers
+- [f8e02b5](https://github.com/robinebers/openusage/commit/f8e02b59228aaa49250b8bf4b49dfad9740ce64b) fix(pricing): price GPT-5.6 fast variants by @robinebers
+- [27ebb0b](https://github.com/robinebers/openusage/commit/27ebb0b9792579cd05ee13f4f6d743b9576a6ebc) Bound concurrent log parsing by @robinebers
+- [27bd492](https://github.com/robinebers/openusage/commit/27bd492ee1e907c0143d76bea8d8c030417f8516) Keep launch-at-login errors visible by @robinebers
+- [2669a7b](https://github.com/robinebers/openusage/commit/2669a7bbc6b1298c84d94e43b19fff93d4e1f40a) Mark Cursor spend as estimated by @robinebers
+- [e881be6](https://github.com/robinebers/openusage/commit/e881be608c07c9f544b5e6eab5e10e0eeaa55334) Fix request-wide long-context pricing by @robinebers
+- [1bcc8f9](https://github.com/robinebers/openusage/commit/1bcc8f9756dc07e4937b93f2bc92e1d6330eeee6) Refresh pricing and panel documentation by @robinebers
+- [4b61302](https://github.com/robinebers/openusage/commit/4b61302f1ff84d9747c9c398f1a59b8bfecff5f2) Remove unused UI plumbing by @robinebers
+- [3194f3b](https://github.com/robinebers/openusage/commit/3194f3baf7c436309a0f1d5f86487bee85e6f764) Clear resolved update banner by @robinebers
+- [c9be949](https://github.com/robinebers/openusage/commit/c9be949905038a4214fe011f5286ab79ee86112c) Add hover affordance to usage trend by @robinebers
+- [8a8ea33](https://github.com/robinebers/openusage/commit/8a8ea33c3e690da980b2832fa1c151330784608d) Add GPT-5.6 pricing aliases and tests by @robinebers
+
 ## v0.7.4-beta.3
 
 ### New Features
