@@ -4,7 +4,7 @@ import SwiftUI
 /// The dashboard's cross-provider Total Spend section: a native segmented period picker
 /// (Today / Yesterday / Last 30 Days) over a donut ring whose segments are each provider's share of
 /// the selected metric, with the total in the center and a ranked legend beside it. The title is a
-/// pull-down menu for Cost / Tokens / Cost/MTok. Data comes from `TotalSpendAggregator` over
+/// pull-down menu for Cost / Cost/MTok / Tokens. Data comes from `TotalSpendAggregator` over
 /// the same snapshots the provider cards render. Shown whenever any enabled provider tracks spend
 /// (`LayoutStore.hasSpendCapableProvider`) and the toggle at the top of Settings is on; a period
 /// (or metric) with nothing to show uses a quiet empty state instead of hiding the card.
@@ -16,7 +16,7 @@ struct TotalSpendCard: View {
 
     /// The selected period survives popover closes and relaunches, like the meter-style toggles.
     @AppStorage("openusage.totalSpend.period") private var periodRawValue = TotalSpendPeriod.today.rawValue
-    /// The selected metric (Cost / Tokens / Cost/MTok) survives the same way.
+    /// The selected metric (Cost / Cost/MTok / Tokens) survives the same way.
     @AppStorage("openusage.totalSpend.metric") private var metricRawValue = TotalSpendMetric.cost.rawValue
     @AppStorage(DensitySetting.key) private var density = DensitySetting.regular
 

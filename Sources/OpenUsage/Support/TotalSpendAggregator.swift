@@ -28,17 +28,18 @@ enum TotalSpendPeriod: String, CaseIterable, Identifiable, Sendable {
 /// choice; the aggregator always collects both dollars and tokens so flipping modes doesn't re-scan.
 /// Raw value `apiSpend` is kept so existing installs don't lose their stored Cost selection.
 enum TotalSpendMetric: String, CaseIterable, Identifiable, Sendable {
+    /// Menu order is declaration order: Cost → Cost/MTok → Tokens. Cost is the default.
     case cost = "apiSpend"
-    case tokens
     case costPerMtok
+    case tokens
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .cost: "Cost"
-        case .tokens: "Tokens"
         case .costPerMtok: "Cost/MTok"
+        case .tokens: "Tokens"
         }
     }
 
@@ -46,8 +47,8 @@ enum TotalSpendMetric: String, CaseIterable, Identifiable, Sendable {
     var emptyMessage: String {
         switch self {
         case .cost: "No cost data for this period"
-        case .tokens: "No token data for this period"
         case .costPerMtok: "No cost-per-token data for this period"
+        case .tokens: "No token data for this period"
         }
     }
 
