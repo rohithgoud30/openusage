@@ -190,7 +190,7 @@ struct DashboardView: View {
                     // destination is usually mounted+measured by now (it mounted on the slideProgress=0
                     // render), so we morph to its ideal. If it ISN'T measured yet and the height was
                     // never established (animatedHeight still the 0 sentinel — e.g. opening Settings
-                    // straight from the status-item menu), we must NOT morph to clampedTarget(0), which
+                    // straight from the status-item menu), we must NOT morph to a clamped zero, which
                     // floors to minPanelHeight and wrongly shrinks the panel: leave the height alone and
                     // let the completion / measurement establish it once a real ideal lands.
                     let coTarget: CGFloat? = heightCoordinator.target(for: destination)

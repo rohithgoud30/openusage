@@ -1,4 +1,4 @@
-import SwiftUI
+import CoreGraphics
 import Observation
 
 /// The popover's auto-fit height *computation*, split out of `DashboardView`: per-screen measured
@@ -52,8 +52,8 @@ final class PanelHeightCoordinator {
         measuredIdeal[screen].map(clamped)
     }
 
-    /// Clamp an ideal to the panel's [min, screen-max] via the shared hook (identity when unset, e.g. tests).
-    func clamped(_ ideal: CGFloat) -> CGFloat {
+    /// Clamp an ideal to the panel's [min, screen-max] via the shared hook (identity when unset).
+    private func clamped(_ ideal: CGFloat) -> CGFloat {
         MenuBarPopover.clampHeight?(ideal) ?? ideal
     }
 }
